@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post List</title>
+</head>
+<body>
+    <h2>Post List</h2>
+    <form method="GET">
+        <input type="text" name="user" value="{{ query_user }}" placeholder="Search by user...">
+        <input type="text" name="content" value="{{ query_content }}" placeholder="Search by content...">
+        <input type="text" name="date" value="{{ query_date }}" placeholder="Search by date...">
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for post in posts %}
+        <li>
+            <strong>{{ post.title }}</strong><br>
+            {{ post.content }}<br>
+            Created by: {{ post.author.username }}<br>
+            Created at: {{ post.created_at }}
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
