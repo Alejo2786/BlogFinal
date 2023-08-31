@@ -1,7 +1,7 @@
 import requests
-from django.shortcuts import render, redirect
-from .forms import RegistrationForm
-from .models import UserProfile, Post
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import RegistrationForm, CommentForm
+from .models import Post, Comment, Repost
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView,  LogoutView
 from django.contrib.auth.decorators import login_required
@@ -64,3 +64,30 @@ def post_list(request):
         'query_content': query_content,
         'query_date': query_date,
     })
+
+@login_required
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    comments = Comment.objects.filter(post=post)
+    reposts = Repost.objects.filter(post=post)
+    user_has_reposted = Repost.objects.filter(user=request.user, post=post).exists()
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment_text = form.cleaned_data['text']
+            Comment.objects.create(user=request.user, post=post, text=comment_text)
+    else:
+        form = CommentForm()
+
+    return render(request, 'post_detail.html', {'post': post, 'comments': comments, 'reposts': reposts, 'user_has_reposted': user_has_reposted, 'form': form})
+
+@login_required
+def repost_post(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    user_has_reposted = Repost.objects.filter(user=request.user, post=post).exists()
+
+    if not user_has_reposted:
+        Repost.objects.create(user=request.user, post=post)
+
+    return redirect('post_detail', post_id=post_id)
