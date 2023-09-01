@@ -46,9 +46,9 @@ def create_post(request):
     return render(request, 'create_post.html')
 
 def post_list(request):
-    query_user = request.GET.get('user')
-    query_content = request.GET.get('content')
-    query_date = request.GET.get('date')
+    query_user = request.GET.get('user', '')  # Establece un valor predeterminado en blanco si es None
+    query_content = request.GET.get('content', '')  # Establece un valor predeterminado en blanco si es None
+    query_date = request.GET.get('date', '')  # Establece un valor predeterminado en blanco si es None
     posts = Post.objects.all()
 
     if query_user:
