@@ -1,11 +1,14 @@
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from .forms import RegistrationForm, CommentForm
 from .models import Post, Comment, Repost
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView,  LogoutView
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from .analytics import fetch_posts_data, plot_post_counts, plot_user_comment_distribution
+
 
 
 def register(request):
@@ -18,8 +21,12 @@ def register(request):
         form = RegistrationForm()
     return render(request, 'register.html', {'form': form})
 
+
+
 def custom_logout(request):
     return LogoutView.as_view()(request)
+
+
 
 def custom_login(request):
     if request.method == 'POST':
@@ -31,8 +38,10 @@ def custom_login(request):
             return redirect('dashboard')  # Redirecciona a la página después del inicio de sesión exitoso
     return LoginView.as_view()(request)
 
+
 def dashboard(request):
     return render(request, 'dashboard.html')
+
 
 @login_required
 def create_post(request):
@@ -44,6 +53,7 @@ def create_post(request):
         post.save()
         return redirect('post_list')
     return render(request, 'create_post.html')
+
 
 def post_list(request):
     query_user = request.GET.get('user', '')  # Establece un valor predeterminado en blanco si es None
@@ -82,6 +92,8 @@ def post_detail(request, post_id):
 
     return render(request, 'post_detail.html', {'post': post, 'comments': comments, 'reposts': reposts, 'user_has_reposted': user_has_reposted, 'form': form})
 
+
+
 @login_required
 def repost_post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
@@ -91,3 +103,25 @@ def repost_post(request, post_id):
         Repost.objects.create(user=request.user, post=post)
 
     return redirect('post_detail', post_id=post_id)
+
+
+
+
+def post_counts(request):
+    # Obtén los datos de las publicaciones
+    df_posts = fetch_posts_data()
+
+    if df_posts is not None:
+        # Si se obtuvieron datos, crea la gráfica y obtén la imagen en base64
+        image_base64 = plot_post_counts(df_posts)
+
+    # Renderiza el template y pasa la imagen en base64 como contexto
+    return render(request, 'post_statistics.html', {'image_base64': image_base64})
+
+
+def user_comment_distribution(request):
+    # Obtén la imagen en formato base64 desde la función de analytics.py
+    image_base64 = plot_user_comment_distribution()
+
+    # Renderiza el template y pasa la imagen base64 como contexto
+    return render(request, 'user_comment_distribution.html', {'image_base64': image_base64})

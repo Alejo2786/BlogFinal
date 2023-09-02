@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from blogtgl import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +30,7 @@ urlpatterns = [
     path('logout/', views.custom_logout, name='logout'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/repost/', views.repost_post, name='repost_post'),
+    path('post_counts/', views.post_counts, name='post_counts'),
+    path('user_comment_distribution/', views.user_comment_distribution, name='user_comment_distribution'),
 ]
+

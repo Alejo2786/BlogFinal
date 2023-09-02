@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Distribución de Comentarios por Usuario</title>
+</head>
+<body>
+    <h1>Distribución de Comentarios por Usuario</h1>
+    {% if image_base64 %}
+    <img src="data:image/png;base64,{{ image_base64 }}" alt="Gráfico de Distribución de Comentarios por Usuario">
+    {% else %}
+    <p>No se pudo generar la gráfica.</p>
+    {% endif %}
+</body>
+</html>
+
